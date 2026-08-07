@@ -10,6 +10,24 @@ sudo apt install -y curl
 # 安装新版 Node 20
 cd /tmp
 curl -fsSL -o node.tar.xz https://nodejs.org/dist/v20.15.0/node-v20.15.0-linux-x64.tar.xz
+
+  方案一:淘宝(npmmirror)镜像
+  curl -fL -o /tmp/node.tar.xz https://npmmirror.com/mirrors/node/v20.15.0/node-v20.15.0-linux-x64.tar.xz
+
+  方案二:华为云镜像
+  curl -fL -o /tmp/node.tar.xz https://mirrors.huaweicloud.com/nodejs/v20.15.0/node-v20.15.0-linux-x64.tar.xz
+
+  方案三:腾讯云镜像
+  curl -fL -o /tmp/node.tar.xz https://mirrors.cloud.tencent.com/nodejs-release/v20.15.0/node-v20.15.0-linux-x64.tar.xz
+
+  下载完成后验证一下文件:
+  ls -lh /tmp/node.tar.xz   # 大约 23MB,太小就说明下载不完整
+
+  然后继续解压:
+  sudo tar -xJf /tmp/node.tar.xz -C /usr/local/node --strip-components=1
+  /usr/local/node/bin/node -v
+
+
 sudo mkdir -p /usr/local/node
 sudo tar -xJf node.tar.xz -C /usr/local/node --strip-components=1
 echo 'export PATH=/usr/local/node/bin:$PATH' >> ~/.bashrc
