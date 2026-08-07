@@ -51,6 +51,9 @@ opencode --version
 sudo apt install -y openssh-server
 sudo systemctl enable --now ssh
 ip a    # 查 IP
+hostname -I
+whoami
+ssh zzr@192.168.1.100
 ```
 
 Windows VSCode：装扩展 **Remote-SSH** → `Ctrl+Shift+P` → `Remote-SSH: Connect to Host` → 输入 `zrx@<IP>` → 输密码。
