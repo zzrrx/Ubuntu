@@ -3,6 +3,10 @@
 ## 1. 安装 opencode
 
 ```bash
+# 1. 安装 curl
+sudo apt update
+sudo apt install -y curl
+
 # 安装新版 Node 20
 cd /tmp
 curl -fsSL -o node.tar.xz https://nodejs.org/dist/v20.15.0/node-v20.15.0-linux-x64.tar.xz
