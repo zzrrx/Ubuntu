@@ -57,3 +57,30 @@ ssh zzr@192.168.1.100
 ```
 
 Windows VSCode：装扩展 **Remote-SSH** → `Ctrl+Shift+P` → `Remote-SSH: Connect to Host` → 输入 `zrx@<IP>` → 输密码。
+
+## 3. Samba 共享目录
+
+让 Windows 通过"映射网络驱动器"访问 Ubuntu 目录。
+
+```bash
+# 1. 装 Samba
+sudo apt update
+sudo apt install -y samba samba-common
+
+# 2. 建共享目录（放在主目录下）
+mkdir -p /home/zrx/share
+
+# 3. 配置共享（追加到 /etc/samba/smb.conf）
+sudo sh -c 'printf "\n[Share]\ncomment = Shared Folder\npath = /home/zrx/share\nvalid users = zrx\ndirectory mask = 0775\ncreate mask = 0775\npublic = no\nwritable = yes\navailable = yes\nbrowseable = yes\n" >> /etc/samba/smb.conf'
+
+# 4. 设 Samba 用户密码
+sudo smbpasswd -a zrx
+
+# 5. 重启服务
+sudo service smbd restart
+sudo systemctl is-active smbd
+```
+
+Windows 侧：右键"此电脑" → 映射网络驱动器 → 文件夹填 `\\<Ubuntu IP>\share` → 输 `zrx` + Samba 密码。
+
+> 坑：`<<'EOF'` heredoc 逐行粘贴会卡住等输入，要用单行 printf 命令或 `nano` 编辑。
