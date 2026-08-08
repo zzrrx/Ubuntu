@@ -151,13 +151,17 @@ sudo apt install -y u-boot-tools mtd-utils cpio doxygen openjdk-17-jre-headless 
 # 杂项
 sudo apt install -y wget scons rsync git-core libxml2-dev xxd
 sudo apt install -y libglib2.0-dev libpixman-1-dev kmod jfsutils reiserfsprogs xfsprogs squashfs-tools quota ppp vim locales libtinfo-dev
+
+# 补充（文档 p7 清单里剩余的，GUI/图形相关，需要才装）
+sudo apt install -y libgl1-mesa-dev x11proto-core-dev libx11-dev liblz4-tool apt-utils grsync pcmciautils
+sudo apt install -y libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev libncursesw5-dev libstdc++6
 ```
 
 验证：
 
 ```bash
-python3 --version   # 要 >= 3.8，实测 3.10.12
-java -version       # 要 >= 8，实测 17
+python3 --version   # 要 >= 3.8，实测 3.10.12（文档要求 python3.8，22.04 无此包，用 3.10 即可）
+java -version       # 要 >= 8，实测 17（文档要求 java8，22.04 用 17 替代）
 ```
 
 ### 坑
@@ -165,6 +169,7 @@ java -version       # 要 >= 8，实测 17
 - **长命令折行**：粘贴后后面的包名变成独立命令报"未找到命令"，要分块短命令执行。
 - **`gcc-arm-linux-gnueabi` 装不上**：依赖 `gcc-11-arm-linux-gnueabi (>= 11.2)`，即使底层装好元包仍报冲突。**MCU 编译用不到它**，直接跳过，交叉编译链用 `gcc-arm-none-eabi`。
 - **`e2fsprogs` 报未找到命令**：折行误报，系统内置，无需装。
+- **文档要求的包在 22.04 不存在**：`python3.8`/`python3.8-distutils`（用系统 python3.10）、`lib32ncurses5-dev`（用 lib32ncurses6）、`libtinfo5`/`libncurses5`/`libncursesw5`（改名 `-dev` 后缀）、`openjdk-8`（用 openjdk-17）、`liblz4-tool` 等。文档基于 18.04，22.04 按包名适配。
 
 ### 下一步（需先拿到 SDK 源码）
 
