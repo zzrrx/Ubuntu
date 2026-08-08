@@ -125,3 +125,47 @@ Windows 侧：右键"此电脑" → 映射网络驱动器 → 文件夹填 `\\<U
   sudo testparm   # 显示 Loaded services file OK. 即通过
   sudo service smbd restart
   ```
+
+## 4. 电鸿 (PowerHarmony) 环境工具链
+
+SDK 编译依赖的环境，Ubuntu 22.04 适配。**命令必须分块执行**——单条长命令粘贴时会折行，后面的包全被当成独立命令而装不上。
+
+```bash
+# 基础（已装就跳过）
+sudo apt update
+sudo apt install -y binutils binutils-dev git git-lfs gnupg flex bison gperf build-essential zip curl zlib1g-dev
+
+# 交叉编译链（apt 自带即 10.3 版，符合文档要求）
+sudo apt install -y gcc-multilib g++-multilib gcc-arm-none-eabi
+arm-none-eabi-gcc --version    # 验证
+
+# 32 位库
+sudo apt install -y libc6-dev-i386 lib32ncurses6 lib32z1 ccache
+
+# 编译依赖工具
+sudo apt install -y libxml2-utils xsltproc bc gnutls-bin python3-pip ruby genext2fs device-tree-compiler libffi-dev pkg-config libssl-dev libelf-dev libdwarf-dev
+
+# 烧录/文档工具
+sudo apt install -y u-boot-tools mtd-utils cpio doxygen openjdk-17-jre-headless texinfo mtools default-jre default-jdk
+
+# 杂项
+sudo apt install -y wget scons rsync git-core libxml2-dev xxd
+sudo apt install -y libglib2.0-dev libpixman-1-dev kmod jfsutils reiserfsprogs xfsprogs squashfs-tools quota ppp vim locales libtinfo-dev
+```
+
+验证：
+
+```bash
+python3 --version   # 要 >= 3.8，实测 3.10.12
+java -version       # 要 >= 8，实测 17
+```
+
+### 坑
+
+- **长命令折行**：粘贴后后面的包名变成独立命令报"未找到命令"，要分块短命令执行。
+- **`gcc-arm-linux-gnueabi` 装不上**：依赖 `gcc-11-arm-linux-gnueabi (>= 11.2)`，即使底层装好元包仍报冲突。**MCU 编译用不到它**，直接跳过，交叉编译链用 `gcc-arm-none-eabi`。
+- **`e2fsprogs` 报未找到命令**：折行误报，系统内置，无需装。
+
+### 下一步（需先拿到 SDK 源码）
+
+源码到手后：解压 → 代码根目录装 hb → `./build/prebuilts_download.sh` → `hb set` 选产品 → `hb build -f`。
