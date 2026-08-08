@@ -71,16 +71,57 @@ sudo apt install -y samba samba-common
 mkdir -p /home/zrx/share
 
 # 3. 配置共享（追加到 /etc/samba/smb.conf）
-sudo sh -c 'printf "\n[Share]\ncomment = Shared Folder\npath = /home/zrx/share\nvalid users = zrx\ndirectory mask = 0775\ncreate mask = 0775\npublic = no\nwritable = yes\navailable = yes\nbrowseable = yes\n" >> /etc/samba/smb.conf'
+# 推荐用 nano 手动编辑，最稳：
+sudo nano /etc/samba/smb.conf
+# 文件末尾追加：
+#   [Share]
+#   comment = Shared Folder
+#   path = /home/zrx/share
+#   valid users = zrx
+#   directory mask = 0775
+#   create mask = 0775
+#   public = no
+#   writable = yes
+#   available = yes
+#   browseable = yes
+# Ctrl+O 保存，Ctrl+X 退出
 
-# 4. 设 Samba 用户密码
+# 或用 tee + heredoc（需整块复制粘贴，不能逐行）：
+sudo tee -a /etc/samba/smb.conf > /dev/null <<'EOF'
+
+[Share]
+comment = Shared Folder
+path = /home/zrx/share
+valid users = zrx
+directory mask = 0775
+create mask = 0775
+public = no
+writable = yes
+available = yes
+browseable = yes
+EOF
+
+# 4. 设 Samba 用户密码（独立于 Ubuntu 登录密码）
 sudo smbpasswd -a zrx
 
-# 5. 重启服务
+# 5. 检查配置语法（必做，能提前发现错误）
+sudo testparm
+
+# 6. 重启服务
 sudo service smbd restart
 sudo systemctl is-active smbd
 ```
 
 Windows 侧：右键"此电脑" → 映射网络驱动器 → 文件夹填 `\\<Ubuntu IP>\share` → 输 `zrx` + Samba 密码。
 
-> 坑：`<<'EOF'` heredoc 逐行粘贴会卡住等输入，要用单行 printf 命令或 `nano` 编辑。
+### 踩坑记录
+
+- **heredoc 逐行粘贴会卡住**：`<<'EOF'` 要整块复制粘贴，逐行输会一直等输入，Ctrl+C 退出。
+- **单行 printf 命令折行会写坏配置**：终端粘贴长命令时折行，导致 `directory mask = 0775` 被拆成两行（`directory mask =` 和 `0775` 分开），smbd 起不来。
+- **报错识别**：`testparm` 报 `Invalid octal number directory mask` = 配置文件里 `directory mask = 0775` 被折行拆断。
+- **修复**：把拆断的两行合并成一行：
+  ```bash
+  sudo sed -i '/^directory mask =$/,/^  0775$/c\directory mask = 0775' /etc/samba/smb.conf
+  sudo testparm   # 显示 Loaded services file OK. 即通过
+  sudo service smbd restart
+  ```
